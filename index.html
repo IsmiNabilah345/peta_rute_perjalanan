@@ -1,184 +1,190 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Peta Rute Gojek Pajagalan</title>
-  
-  <!-- CSS Leaflet -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-    body, html {
-      width: 100%;
-      height: 100%;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      display: flex;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Peta Rute Gojek Pajagalan - croot.js</title>
 
-    /* Styling Sidebar Kiri */
-    #sidebar {
-      width: 320px;
-      height: 100vh;
-      background-color: #ffffff;
-      box-shadow: 2px 0 10px rgba(0,0,0,0.15);
-      z-index: 1000;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-      overflow-y: auto;
-    }
-    #sidebar h2 {
-      font-size: 1.25rem;
-      color: #2c3e50;
-      border-bottom: 3px solid #00aa13; /* Warna Hijau Gojek */
-      padding-bottom: 8px;
-    }
-    .info-card {
-      background-color: #f8f9fa;
-      border-radius: 8px;
-      padding: 15px;
-      border-left: 4px solid #e74c3c;
-    }
-    .info-item {
-      margin-bottom: 12px;
-    }
-    .info-item:last-child {
-      margin-bottom: 0;
-    }
-    .info-item label {
-      font-size: 0.75rem;
-      color: #7f8c8d;
-      text-transform: uppercase;
-      font-weight: bold;
-      display: block;
-      margin-bottom: 2px;
-    }
-    .info-item span {
-      font-size: 0.95rem;
-      color: #2c3e50;
-      font-weight: 600;
-    }
-    .price-tag {
-      color: #27ae60 !important;
-      font-size: 1.2rem !important;
-    }
+    <!-- CSS Leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
-    /* Styling Area Peta */
-    #map {
-      flex: 1;
-      height: 100vh;
-    }
-  </style>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body,
+        html {
+            width: 100%;
+            height: 100%;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+        }
+
+        /* Sidebar Kiri */
+        #sidebar {
+            width: 320px;
+            height: 100vh;
+            background-color: #ffffff;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            overflow-y: auto;
+        }
+
+        #sidebar h2 {
+            font-size: 1.25rem;
+            color: #2c3e50;
+            border-bottom: 3px solid #00aa13;
+            padding-bottom: 8px;
+        }
+
+        .info-card {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            border-left: 4px solid #e74c3c;
+        }
+
+        .info-item {
+            margin-bottom: 12px;
+        }
+
+        .info-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .info-item label {
+            font-size: 0.75rem;
+            color: #7f8c8d;
+            text-transform: uppercase;
+            font-weight: bold;
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .info-item span {
+            font-size: 0.95rem;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .price-tag {
+            color: #27ae60 !important;
+            font-size: 1.2rem !important;
+        }
+
+        /* Area Peta */
+        #map {
+            flex: 1;
+            height: 100vh;
+        }
+    </style>
 </head>
+
 <body>
 
-  <!-- Sidebar Kiri -->
-  <div id="sidebar">
-    <h2>🛵 Informasi Rute Gojek</h2>
-    <div class="info-card">
-      <div class="info-item">
-        <label>Nama Rute</label>
-        <span id="nama-rute">Alun-Alun Bandung - Pajagalan</span>
-      </div>
-      <div class="info-item">
-        <label>Titik Asal</label>
-        <span id="asal">Alun-Alun Bandung</span>
-      </div>
-      <div class="info-item">
-        <label>Titik Tujuan</label>
-        <span id="tujuan">Jl. Pajagalan, Astanaanyar</span>
-      </div>
-      <div class="info-item">
-        <label>Jarak Tempuh</label>
-        <span id="jarak">1.8 km</span>
-      </div>
-      <div class="info-item">
-        <label>Estimasi Ongkos</label>
-        <span id="ongkos" class="price-tag">Rp 10.000</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- Area Peta Leaflet -->
-  <div id="map"></div>
-
-  <!-- Leaflet JS -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  
-  <script>
-    // 1. Inisialisasi peta ke koordinat Pajagalan, Bandung
-    const map = L.map('map').setView([-6.923, 107.603], 15);
-
-    // 2. Basemap Esri (Bebas Watermark & Bebas API Key)
-    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
-      attribution: 'Tiles &copy; Esri &mdash; Source: Esri, USGS'
-    }).addTo(map);
-
-    // 3. Data GeoJSON Rute Gojek
-    const dataGeoJSON = {
-      "type": "FeatureCollection",
-      "features": [
-        {
-          "type": "Feature",
-          "properties": {
-            "nama_rute": "Rute Gojek Alun-Alun Bandung ke Pajagalan",
-            "asal": "Alun-Alun Bandung",
-            "tujuan": "Jl. Pajagalan, Astanaanyar",
-            "jarak_km": "1.8 km",
-            "ongkos_gojek": "Rp 10.000",
-            "jenis_transportasi": "Gojek (GoRide)"
-          },
-          "geometry": {
-            "type": "LineString",
-            "coordinates": [
-              [107.60858, -6.92184],
-              [107.60621, -6.92182],
-              [107.60251, -6.92180],
-              [107.60254, -6.92420],
-              [107.60008, -6.92535]
-            ]
-          }
-        }
-      ]
-    };
-
-    // 4. Tampilkan rute garis di peta
-    const geojsonLayer = L.geoJSON(dataGeoJSON, {
-      style: {
-        color: '#e74c3c',
-        weight: 6,
-        opacity: 0.85
-      },
-      onEachFeature: (feature, layer) => {
-        if (feature.properties) {
-          const p = feature.properties;
-          
-          layer.bindPopup(`
-            <div style="font-family: sans-serif;">
-              <h4 style="margin-bottom: 4px; color: #2c3e50;">${p.nama_rute}</h4>
-              <p style="margin: 0;"><b>Ongkos:</b> <span style="color: #27ae60; font-weight: bold;">${p.ongkos_gojek}</span></p>
+    <!-- Sidebar Kiri -->
+    <div id="sidebar">
+        <h2>🛵 Informasi Rute Gojek</h2>
+        <div class="info-card">
+            <div class="info-item">
+                <label>Nama Rute</label>
+                <span id="nama-rute">Memuat data...</span>
             </div>
-          `);
+            <div class="info-item">
+                <label>Titik Asal</label>
+                <span id="asal">Memuat data...</span>
+            </div>
+            <div class="info-item">
+                <label>Titik Tujuan</label>
+                <span id="tujuan">Memuat data...</span>
+            </div>
+            <div class="info-item">
+                <label>Jarak Tempuh</label>
+                <span id="jarak">Memuat data...</span>
+            </div>
+            <div class="info-item">
+                <label>Estimasi Ongkos</label>
+                <span id="ongkos" class="price-tag">Memuat data...</span>
+            </div>
+        </div>
+    </div>
 
-          // Update sidebar secara dinamis
-          document.getElementById('nama-rute').innerText = p.nama_rute;
-          document.getElementById('asal').innerText = p.asal;
-          document.getElementById('tujuan').innerText = p.tujuan;
-          document.getElementById('jarak').innerText = p.jarak_km;
-          document.getElementById('ongkos').innerText = p.ongkos_gojek;
-        }
-      }
-    }).addTo(map);
+    <!-- Area Peta Leaflet -->
+    <div id="map"></div>
 
-    // Auto fit peta ke batas garis rute
-    map.fitBounds(geojsonLayer.getBounds(), { padding: [50, 50] });
-  </script>
+    <!-- Leaflet JS (Engine Pemetaan) -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- Script ES Module croot.js -->
+    <script type="module">
+        import { getJSON } from "https://cdn.jsdelivr.net/gh/jscroot/lib@0.2.0/api.js";
+        import { setInner } from "https://cdn.jsdelivr.net/gh/jscroot/lib@0.2.0/element.js";
+
+        // 1. Inisialisasi peta ke Pajagalan
+        const map = L.map('map').setView([-6.923, 107.603], 15);
+
+        // 2. Tile layer Esri
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+            attribution: 'Tiles &copy; Esri &mdash; Source: Esri, USGS'
+        }).addTo(map);
+
+        // 3. Panggil data via croot.js
+        getJSON('./rute.geojson', null, null, (response) => {
+            let data = response;
+
+            // Parse otomatis kalau response dari croot masih berupa string teks
+            if (typeof response === 'string') {
+                try {
+                    data = JSON.parse(response);
+                } catch (err) {
+                    console.error("Gagal parse teks ke JSON:", err);
+                }
+            } else if (response && response.data) {
+                data = response.data;
+            }
+
+            // Pastikan objek GeoJSON memiliki properti 'type' (FeatureCollection / Feature)
+            if (data && (data.type === "FeatureCollection" || data.type === "Feature")) {
+                const geojsonLayer = L.geoJSON(data, {
+                    style: {
+                        color: '#e74c3c',
+                        weight: 6,
+                        opacity: 0.85
+                    },
+                    onEachFeature: (feature, layer) => {
+                        if (feature.properties) {
+                            const p = feature.properties;
+
+                            layer.bindPopup(`
+                <div style="font-family: sans-serif;">
+                  <h4 style="margin-bottom: 4px; color: #2c3e50;">${p.nama_rute}</h4>
+                  <p style="margin: 0;"><b>Ongkos:</b> <span style="color: #27ae60; font-weight: bold;">${p.ongkos_gojek}</span></p>
+                </div>
+              `);
+
+                            setInner('nama-rute', p.nama_rute || '-');
+                            setInner('asal', p.asal || '-');
+                            setInner('tujuan', p.tujuan || '-');
+                            setInner('jarak', p.jarak_km || '-');
+                            setInner('ongkos', p.ongkos_gojek || '-');
+                        }
+                    }
+                }).addTo(map);
+
+                map.fitBounds(geojsonLayer.getBounds(), { padding: [50, 50] });
+            } else {
+                console.error("Struktur GeoJSON tidak valid:", data);
+            }
+        });
+    </script>
 </body>
+
 </html>
